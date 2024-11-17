@@ -21,6 +21,9 @@ from eveuniverse.models import EveType
 # AA SRP
 from aasrp.managers import SettingManager
 
+# Fittings
+from fittings.models import Doctrine, Fitting
+
 
 def get_sentinel_user():
     """
@@ -76,6 +79,13 @@ class FleetType(models.Model):
         verbose_name=_("Is enabled"),
     )
 
+    passcode = models.CharField(
+        max_length=256,
+        default="",
+        help_text=_("Fleet type override passcode"),
+        verbose_name=_("Passcode"),
+    )
+
     class Meta:  # pylint: disable=too-few-public-methods
         """
         AFatLinkType :: Meta
@@ -110,14 +120,25 @@ class SrpLink(models.Model):
         CLOSED = "Closed", _("Closed")
         COMPLETED = "Completed", _("Completed")
 
-    srp_name = models.CharField(max_length=254, default="", verbose_name=_("SRP name"))
+    srp_name = models.CharField(
+        max_length=254, 
+        default="", 
+        verbose_name=_("SRP name")
+    )
+
     srp_status = models.CharField(
         max_length=9,
         choices=Status.choices,
         default=Status.ACTIVE,
         verbose_name=_("SRP status"),
     )
-    srp_code = models.CharField(max_length=16, default="", verbose_name=_("SRP code"))
+
+    srp_code = models.CharField(
+        max_length=16, 
+        default="", 
+        verbose_name=_("SRP code")
+    )
+
     fleet_commander = models.ForeignKey(
         EveCharacter,
         related_name="+",
@@ -127,24 +148,42 @@ class SrpLink(models.Model):
         on_delete=models.SET_NULL,
         verbose_name=_("Fleet commander"),
     )
-    fleet_doctrine = models.CharField(
-        max_length=254, default="", verbose_name=_("Doctrine")
+
+    fleet_doctrine = models.ForeignKey(
+        Doctrine,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        default=None,
+        help_text=_("The doctrine flown by this fleet"),
+        verbose_name=_("Fleet Doctrine"),
     )
 
     fleet_type = models.ForeignKey(
         FleetType,
         related_name="+",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
         default=None,
         help_text=_("The SRP link fleet type, if it's set"),
         verbose_name=_("Fleet type"),
     )
 
     fleet_time = models.DateTimeField(verbose_name=_("Fleet time"))
+
     aar_link = models.CharField(
-        max_length=254, blank=True, default="", verbose_name=_("AAR link")
+        max_length=254, 
+        blank=True, 
+        default="", 
+        verbose_name=_("AAR link")
+    )
+    
+    additional_notes = models.CharField(
+        max_length=1024,
+        blank=True,
+        default="",
+        verbose_name=_("Additional notes")
     )
 
     creator = models.ForeignKey(
@@ -163,6 +202,7 @@ class SrpLink(models.Model):
         Meta definitions
         """
 
+        ordering = ["-fleet_time"]
         default_permissions = ()
         verbose_name = _("SRP link")
         verbose_name_plural = _("SRP links")

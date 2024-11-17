@@ -139,7 +139,7 @@ def dashboard_srp_links_data(
                 "fleet_time": srp_link.fleet_time,
                 "fleet_type": fleet_type,
                 # "fleet_commander": srp_link.fleet_commander.character_name,
-                "fleet_doctrine": srp_link.fleet_doctrine,
+                "fleet_doctrine": srp_link.fleet_doctrine.name,
                 "aar_link": aar_link,
                 "srp_code": {"display": srp_code_html, "sort": srp_link.srp_code},
                 "srp_costs": srp_link.total_cost,

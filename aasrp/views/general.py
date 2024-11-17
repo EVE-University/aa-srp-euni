@@ -27,6 +27,7 @@ from aasrp.constants import KILLBOARD_DATA
 from aasrp.form import (
     SrpLinkForm,
     SrpLinkUpdateForm,
+    SrpLinkChangeFleetTypeForm,
     SrpRequestAcceptForm,
     SrpRequestAcceptRejectedForm,
     SrpRequestForm,
@@ -36,7 +37,7 @@ from aasrp.form import (
 from aasrp.helper.notification import notify_srp_team
 from aasrp.helper.user import get_user_settings
 from aasrp.managers import SrpManager
-from aasrp.models import Insurance, RequestComment, SrpLink, SrpRequest
+from aasrp.models import Insurance, FleetType, RequestComment, SrpLink, SrpRequest
 
 logger = LoggerAddTag(my_logger=get_extension_logger(__name__), prefix=__title__)
 
@@ -163,9 +164,32 @@ def srp_link_add(request: WSGIRequest) -> HttpResponse:
         if form.is_valid():
             srp_name = form.cleaned_data["srp_name"]
             fleet_time = form.cleaned_data["fleet_time"]
-            fleet_type = form.cleaned_data["fleet_type"]
             fleet_doctrine = form.cleaned_data["fleet_doctrine"]
             aar_link = form.cleaned_data["aar_link"]
+            additional_notes = form.cleaned_data["additional_notes"]
+
+            try:
+                # if kitchen sink, base srp
+                if fleet_doctrine.name.lower() == "kitchen sink":
+                    fleet_type = FleetType.objects.get(name__iexact="base")
+                # otherwise if a fleet type passcode was entered, set to that fleet type
+                elif additional_notes and FleetType.objects.filter(passcode=additional_notes):
+                    fleet_type = FleetType.objects.get(passcode=additional_notes)
+                # else, advanced srp
+                else:
+                    fleet_type = FleetType.objects.get(name__iexact="advanced")
+            except FleetType.DoesNotExist as e:
+                logger.error(e)
+                messages.error(
+                    request=request, message=_(f"Failed to retrieve fleet type with exception {e}")
+                )
+                return redirect(to="aasrp:add_srp_link")
+            except FleetType.MultipleObjectsReturned as e:
+                logger.error(e)
+                messages.error(
+                    request=request, message=_(f"Duplicate fleet types returned with exception {e}")
+                )
+                return redirect(to="aasrp:add_srp_link")
 
             srp_link = SrpLink(
                 srp_name=srp_name,
@@ -173,6 +197,7 @@ def srp_link_add(request: WSGIRequest) -> HttpResponse:
                 fleet_type=fleet_type,
                 fleet_doctrine=fleet_doctrine,
                 aar_link=aar_link,
+                additional_notes=additional_notes,
                 srp_code=get_random_string(length=16),
                 fleet_commander=request.user.profile.main_character,
                 creator=request.user,
@@ -535,6 +560,48 @@ def complete_srp_link(request: WSGIRequest, srp_code: str):
 
 @login_required
 @permissions_required(("aasrp.manage_srp", "aasrp.manage_srp_requests"))
+def srp_link_change_fleet_type(request: WSGIRequest, srp_code: str) -> HttpResponse:
+    """
+    Change the fleet type for a specific SRP code
+
+    :param request:
+    :type request:
+    :param srp_code:
+    :type srp_code:
+    :return:
+    :rtype:
+    """
+
+    logger.info(
+        msg=f"Change fleet type request for SRP code {srp_code} called by {request.user}"
+    )
+
+    # Check if the provided SRP code is valid
+    if SrpLink.objects.filter(srp_code=srp_code).exists() is False:
+        logger.error(
+            msg=f"Unable to locate SRP Fleet using code {srp_code} for user {request.user}"
+        )
+
+        messages.error(
+            request=request, message=_(f"Unable to locate SRP code with ID {srp_code}")
+        )
+
+        return redirect(to="aasrp:srp_links")
+    
+    srp_link = SrpLink.objects.get(srp_code=srp_code)
+    
+    form = SrpLinkChangeFleetTypeForm(request.POST)
+
+    if form.is_valid():
+        srp_link.fleet_type = form.cleaned_data["fleet_type"]
+        srp_link.save()
+        # TODO: call function to recompute srp link requests' payouts        
+
+    return redirect(to=request.META['HTTP_REFERER'])
+
+
+@login_required
+@permissions_required(("aasrp.manage_srp", "aasrp.manage_srp_requests"))
 def srp_link_view_requests(request: WSGIRequest, srp_code: str) -> HttpResponse:
     """
     View SRP requests for a specific SRP code
@@ -567,13 +634,16 @@ def srp_link_view_requests(request: WSGIRequest, srp_code: str) -> HttpResponse:
     reject_form = SrpRequestRejectForm()
     accept_form = SrpRequestAcceptForm()
     accept_rejected_form = SrpRequestAcceptRejectedForm()
+    fleet_type_form = SrpLinkChangeFleetTypeForm(initial={'fleet_type': srp_link.fleet_type})
 
     context = {
         "srp_link": srp_link,
+        "srp_code": srp_code,
         "forms": {
             "reject_request": reject_form,
             "accept_request": accept_form,
             "accept_rejected_request": accept_rejected_form,
+            "fleet_type": fleet_type_form
         },
     }
 

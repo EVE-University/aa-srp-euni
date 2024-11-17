@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load humanize %}
+{% load django_bootstrap5 %}
 
 <div class="card card-default card-srp-request-overview mb-3">
     <div class="card-header">
@@ -47,6 +48,11 @@
                 </div>
 
                 <div class="card-srp-request-overview-cell">
+                    <dt>{% translate "Fleet type" %}:</dt>
+                    <dd>{{ srp_link.fleet_type }}</dd>
+                </div>
+
+                <div class="card-srp-request-overview-cell">
                     <dt>{% translate "SRP code" %}:</dt>
                     <dd>{{ srp_link.srp_code }}</dd>
                 </div>
@@ -57,6 +63,27 @@
                 <div class="card-srp-request-overview-cell">
                     <dt>{% translate "SRP cost" %}:</dt>
                     <dd class="srp-fleet-total-amount">{{ srp_link.total_cost|intcomma }} ISK</dd>
+                </div>
+
+                <div class="card-srp-request-overview-cell">
+                    <dt>{% translate "Additional notes" %}:</dt>
+                    <dd class="srp-fleet-notes">{{ srp_link.additional_notes }}</dd>
+                </div>
+
+                <div class="card-srp-request-overview-cell">
+                    <dt>{% translate "Change Fleet Type" %}:</dt>
+                    <dd class="srp-change-fleet-type">
+                        <form action="{% url 'aasrp:change_srp_link_fleet_type' srp_code %}" method="post">
+                            {% csrf_token %}
+                            
+                            <fieldset class="aa-srp-add-link-form col-md-6 col-md-offset-3" style="padding-top: 9px;">
+                                {% bootstrap_form forms.fleet_type %}
+                            </fieldset>
+
+                            {% translate "Submit" as button_text %}
+                            {% bootstrap_button button_type="submit" content=button_text %}
+                        </form>
+                    </dd>
                 </div>
             </div>
         </div>

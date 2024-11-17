@@ -16,6 +16,7 @@ $(document).ready(() => {
             dataSrc: '',
             cache: false
         },
+        order: [[2, 'desc']],
         columns: [
             {
                 data: 'srp_name',
@@ -103,7 +104,6 @@ $(document).ready(() => {
                 targets: [10]
             }
         ],
-        order: [[2, 'asc']],
         paging: aaSrpSettings.dataTable.paging,
         /**
          * When ever a row is created …

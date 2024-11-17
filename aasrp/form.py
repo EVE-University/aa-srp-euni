@@ -16,6 +16,9 @@ from aasrp.constants import KILLBOARD_DATA
 from aasrp.managers import SrpManager
 from aasrp.models import FleetType, Setting, SrpLink, SrpRequest, UserSetting
 
+# Fittings
+from fittings.models import Doctrine
+
 # Killboard URLs
 zkillboard_base_url: str = KILLBOARD_DATA["zKillboard"]["base_url"]
 evetools_base_url: str = KILLBOARD_DATA["EveTools"]["base_url"]
@@ -56,24 +59,31 @@ class SrpLinkForm(ModelForm):
     """
 
     srp_name = forms.CharField(
-        required=True, label=get_mandatory_form_label_text(text=_("Fleet name"))
+        required=True, 
+        label=get_mandatory_form_label_text(text=_("Fleet name"))
     )
+    
     fleet_time = forms.DateTimeField(
         required=True,
         label=get_mandatory_form_label_text(text=_("Fleet time")),
         widget=forms.DateTimeInput(attrs={"autocomplete": "off"}),
     )
-    fleet_type = forms.ModelChoiceField(
-        required=False,
-        label=_("Fleet type (optional)"),
-        queryset=FleetType.objects.filter(is_enabled=True),
-        # empty_label=_("Please select a fleet type"),
+    
+    aar_link = forms.CharField(
+        required=False, 
+        label=_("After action report link")
     )
-    fleet_doctrine = forms.CharField(
+
+    fleet_doctrine=forms.ModelChoiceField(
         required=True,
         label=get_mandatory_form_label_text(text=_("Doctrine")),
+        queryset=Doctrine.objects.all(),
     )
-    aar_link = forms.CharField(required=False, label=_("After action report link"))
+
+    additional_notes = forms.CharField(
+        required=False,
+        label=_("Additional notes")
+    )
 
     class Meta:  # pylint: disable=too-few-public-methods
         """
@@ -81,7 +91,7 @@ class SrpLinkForm(ModelForm):
         """
 
         model = SrpLink
-        fields = ["srp_name", "fleet_time", "fleet_type", "fleet_doctrine", "aar_link"]
+        fields = ["srp_name", "fleet_time", "fleet_doctrine", "aar_link", "additional_notes"]
 
 
 class SrpLinkUpdateForm(ModelForm):
@@ -100,6 +110,27 @@ class SrpLinkUpdateForm(ModelForm):
         fields = ["aar_link"]
 
 
+class SrpLinkChangeFleetTypeForm(ModelForm):
+    """
+    Change the SRP type of link
+    """
+
+    fleet_type = forms.ModelChoiceField(
+        required=True,
+        label='',
+        queryset=FleetType.objects.filter(is_enabled=True),
+        # empty_label=_("Please select a fleet type"),
+    )
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Meta definitions
+        """
+
+        model = SrpLink
+        fields = ["fleet_type"]
+
+
 class SrpRequestForm(ModelForm):
     """
     SRP request form
@@ -116,8 +147,8 @@ class SrpRequestForm(ModelForm):
 
     additional_info = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 10, "cols": 20, "input_type": "textarea"}),
-        required=True,
-        label=get_mandatory_form_label_text(text=_("Additional information")),
+        required=False,
+        label=_("Additional information (optional)"),
         help_text=_(
             "Please tell us about the circumstances of your untimely demise. "
             "Who was the FC, what doctrine was called, have changes to the fit "

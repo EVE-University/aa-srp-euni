@@ -31,6 +31,11 @@ urlpatterns = [
         name="edit_srp_link",
     ),
     path(
+        route="srp-link/<str:srp_code>/change_fleet_type/",
+        view=general.srp_link_change_fleet_type,
+        name="change_srp_link_fleet_type",
+    ),
+    path(
         route="srp-link/<str:srp_code>/view-srp-requests/",
         view=general.srp_link_view_requests,
         name="view_srp_requests",
