@@ -18,45 +18,43 @@
 {% endblock %}
 
 {% block extra_javascript %}
-    {% include "bundles/datatables-js-bs5.html" %}
-    {% include "bundles/moment-js.html" with locale=True %}
-    {% include "bundles/filterdropdown-js.html" %}
-    {% include "aasrp/bundles/aa-srp-form-js.html" %}
+    {% translate "Ship" as translationShip %}
+    {% translate "Request status" as translationRequestStatus %}
+    {% translate "Character" as translationCharacter %}
+    {% translate "SRP code" as translationSrpCode %}
+    {% translate "Request code" as translationRequestCode %}
+    {% translate "Requestor" as translationRequestor %}
+    {% translate "Additional information" as translationAdditionalInformation %}
+    {% translate "Reject information" as translationRejectInformation %}
 
     <script>
         /**
          * Passing some setting to our JS
          */
-        const urlUserSrpRequests = "{% url 'aasrp:ajax_dashboard_user_srp_requests_data' %}";
-
-        const aaSrpSettings = {
-            datetimeFormat: 'YYYY-MM-DD<br>HH:mm',
+        const aaSrpJsSettingsOverride = {
             url: {
-                userSrpRequests: urlUserSrpRequests
-            },
-            dataTable: {
-                paging: {{ show_all_links|yesno:"true,false" }}
+                userSrpRequests: '{% url "aasrp:ajax_dashboard_user_srp_requests_data" %}'
             },
             translation: {
                 filter: {
-                    ship: "{% translate 'Ship' %}",
-                    requestStatus: "{% translate 'Request status' %}",
-                    character: "{% translate 'Character' %}",
+                    ship: '{{ translationShip|escapejs }}',
+                    requestStatus: '{{ translationRequestStatus|escapejs }}',
+                    character: '{{ translationCharacter|escapejs }}',
                 },
                 dataTable: {
                     content: {
-                        srpCode: "{% translate 'SRP code' %}",
-                        requestCode: "{% translate 'Request code' %}"
+                        srpCode: '{{ translationSrpCode|escapejs }}',
+                        requestCode: '{{ translationRequestCode|escapejs }}',
                     }
                 },
                 modal: {
                     srpDetails: {
                         body: {
-                            requestor: '{% translate "Requestor" %}',
-                            character: '{% translate "Character" %}',
-                            ship: '{% translate "Ship" %}',
-                            additionalInformation: '{% translate "Additional information" %}',
-                            rejectInformation: '{% translate "Reject information" %}'
+                            requestor: '{{ translationRequestor|escapejs }}',
+                            character: '{{ translationCharacter|escapejs }}',
+                            ship: '{{ translationShip|escapejs }}',
+                            additionalInformation: '{{ translationAdditionalInformation|escapejs }}',
+                            rejectInformation: '{{ translationRejectInformation|escapejs }}',
                         }
                     }
                 }
@@ -64,5 +62,10 @@
         };
     </script>
 
+    {% include "bundles/datatables-js-bs5.html" %}
+    {% include "bundles/moment-js.html" with locale=True %}
+    {% include "bundles/filterdropdown-js.html" %}
+    {% include "aasrp/bundles/aa-srp-js.html" %}
+    {% include "aasrp/bundles/aa-srp-form-js.html" %}
     {% include "aasrp/bundles/my-srp-requests-js.html" %}
 {% endblock %}

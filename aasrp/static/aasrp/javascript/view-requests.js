@@ -11,6 +11,7 @@ $(document).ready(() => {
      * @type {*|jQuery}
      */
     const srpRequestsTable = elementSrpRequestsTable.DataTable({
+        language: aaSrpSettings.dataTable.language,
         ajax: {
             url: aaSrpSettings.url.requestsForSrpLink,
             dataSrc: '',
@@ -25,8 +26,15 @@ $(document).ready(() => {
                  * @param data
                  * @returns {*}
                  */
-                render: (data) => {
-                    return moment(data).utc().format(aaSrpSettings.datetimeFormat);
+                render: {
+                    _: (data) => {
+                        return data === null ? '' : moment(data).utc().format(
+                            aaSrpSettings.datetimeFormat
+                        );
+                    },
+                    sort: (data) => {
+                        return data === null ? '' : data;
+                    }
                 },
                 className: 'srp-request-time'
             },
@@ -66,7 +74,7 @@ $(document).ready(() => {
                  */
                 render: (data, type) => {
                     if (type === 'display') {
-                        return `${data.toLocaleString()} ISK`;
+                        return `${new Intl.NumberFormat(aaSrpSettings.locale).format(data)} ISK`;
                     } else {
                         return data;
                     }
@@ -84,7 +92,7 @@ $(document).ready(() => {
                  */
                 render: (data, type) => {
                     if (type === 'display') {
-                        return `<span class="srp-payout-tooltip"><span class="srp-payout-amount">${data.toLocaleString()} ISK</span></span>`;
+                        return `<span class="srp-payout-tooltip"><span class="srp-payout-amount">${new Intl.NumberFormat(aaSrpSettings.locale).format(data)} ISK</span></span>`;
                     } else {
                         return data;
                     }
@@ -216,7 +224,7 @@ $(document).ready(() => {
         newValue = parseInt(newValue);
 
         // Update payout value formatted
-        const newValueFormatted = `${newValue.toLocaleString()} ISK`;
+        const newValueFormatted = `${new Intl.NumberFormat(aaSrpSettings.locale).format(newValue)} ISK`;
 
         // Update the element
         element
@@ -234,7 +242,7 @@ $(document).ready(() => {
             totalSrpAmount += parseInt(payoutElement.getAttribute('data-value'));
         });
 
-        $('.srp-fleet-total-amount').html(`${totalSrpAmount.toLocaleString()} ISK`);
+        $('.srp-fleet-total-amount').html(`${new Intl.NumberFormat(aaSrpSettings.locale).format(totalSrpAmount)} ISK`);
     };
 
     /**
@@ -319,7 +327,7 @@ $(document).ready(() => {
         });
 
         // Update fleet total SRP amount
-        $('.srp-fleet-total-amount').html(`${totalSrpAmount.toLocaleString()} ISK`);
+        $('.srp-fleet-total-amount').html(`${new Intl.NumberFormat(aaSrpSettings.locale).format(totalSrpAmount)} ISK`);
 
         // Update requests counts
         $('.srp-requests-total-count').html(requestsTotal);
@@ -359,14 +367,14 @@ $(document).ready(() => {
 
         $('#modal-button-confirm-accept-request').on('click', () => {
             const form = modalSrpRequestAccept.find('form');
-            const reviserComment = form.find('textarea[name="reviser_comment"]').val();
+            const reviserComment = form.find('textarea[name="comment"]').val();
             const csrfMiddlewareToken = form.find('input[name="csrfmiddlewaretoken"]')
                 .val();
 
             const posting = $.post(
                 url,
                 {
-                    reviser_comment: reviserComment,
+                    comment: reviserComment,
                     csrfmiddlewaretoken: csrfMiddlewareToken
                 }
             );
@@ -382,7 +390,7 @@ $(document).ready(() => {
             modalSrpRequestAccept.modal('hide');
         });
     }).on('hide.bs.modal', () => {
-        modalSrpRequestAccept.find('textarea[name="reject_info"]').val('');
+        modalSrpRequestAccept.find('textarea[name="comment"]').val('');
 
         $('#modal-button-confirm-accept-request').unbind('click');
     });
@@ -394,7 +402,7 @@ $(document).ready(() => {
 
         $('#modal-button-confirm-accept-rejected-request').on('click', () => {
             const form = modalSrpRequestAcceptRejected.find('form');
-            const reviserComment = form.find('textarea[name="reviser_comment"]').val();
+            const reviserComment = form.find('textarea[name="comment"]').val();
             const csrfMiddlewareToken = form.find('input[name="csrfmiddlewaretoken"]')
                 .val();
 
@@ -404,13 +412,13 @@ $(document).ready(() => {
                 form.find('.aasrp-form-field-errors').remove();
 
                 $(errorMessage).insertAfter(
-                    $('textarea[name="reviser_comment"]')
+                    $('textarea[name="comment"]')
                 );
             } else {
                 const posting = $.post(
                     url,
                     {
-                        reviser_comment: reviserComment,
+                        comment: reviserComment,
                         csrfmiddlewaretoken: csrfMiddlewareToken
                     }
                 );
@@ -427,7 +435,7 @@ $(document).ready(() => {
             }
         });
     }).on('hide.bs.modal', () => {
-        modalSrpRequestAcceptRejected.find('textarea[name="reviser_comment"]').val('');
+        modalSrpRequestAcceptRejected.find('textarea[name="comment"]').val('');
 
         $('.aasrp-form-field-errors').remove();
         $('#modal-button-confirm-accept-rejected-request').unbind('click');
@@ -440,7 +448,7 @@ $(document).ready(() => {
 
         $('#modal-button-confirm-reject-request').on('click', () => {
             const form = modalSrpRequestReject.find('form');
-            const rejectInfo = form.find('textarea[name="reject_info"]').val();
+            const rejectInfo = form.find('textarea[name="comment"]').val();
             const csrfMiddlewareToken = form.find('input[name="csrfmiddlewaretoken"]')
                 .val();
 
@@ -449,12 +457,12 @@ $(document).ready(() => {
 
                 form.find('.aasrp-form-field-errors').remove();
 
-                $(errorMessage).insertAfter($('textarea[name="reject_info"]'));
+                $(errorMessage).insertAfter($('textarea[name="comment"]'));
             } else {
                 const posting = $.post(
                     url,
                     {
-                        reject_info: rejectInfo,
+                        comment: rejectInfo,
                         csrfmiddlewaretoken: csrfMiddlewareToken
                     }
                 );
@@ -471,7 +479,7 @@ $(document).ready(() => {
             }
         });
     }).on('hide.bs.modal', () => {
-        modalSrpRequestReject.find('textarea[name="reject_info"]').val('');
+        modalSrpRequestReject.find('textarea[name="comment"]').val('');
 
         $('.aasrp-form-field-errors').remove();
         $('#modal-button-confirm-reject-request').unbind('click');
@@ -495,7 +503,7 @@ $(document).ready(() => {
             modalSrpRequestRemove.modal('hide');
         });
     }).on('hide.bs.modal', () => {
-        modalSrpRequestRemove.find('textarea[name="reject_info"]').val('');
+        modalSrpRequestRemove.find('textarea[name="comment"]').val('');
 
         $('#modal-button-confirm-remove-request').unbind('click');
     });

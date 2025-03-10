@@ -2,8 +2,21 @@
 App settings
 """
 
+# Standard Library
+from re import RegexFlag
+
 # Django
 from django.apps import apps
+from django.conf import settings
+
+# Port used to communicate with Discord Proxy
+DISCORDPROXY_PORT = getattr(settings, "DISCORDPROXY_PORT", 50051)
+
+# Host used to communicate with Discord Proxy
+DISCORDPROXY_HOST = getattr(settings, "DISCORDPROXY_HOST", "localhost")
+
+# Timeout for Discord Proxy communication
+DISCORDPROXY_TIMEOUT = getattr(settings, "DISCORDPROXY_TIMEOUT", 300)
 
 
 def allianceauth_discordbot_installed() -> bool:
@@ -44,3 +57,14 @@ def discordproxy_installed() -> bool:
         return False
 
     return True
+
+
+def debug_enabled() -> RegexFlag:
+    """
+    Check if DEBUG is enabled
+
+    :return:
+    :rtype:
+    """
+
+    return settings.DEBUG

@@ -2,18 +2,42 @@
 Constants
 """
 
+# Standard Library
+import os
+from enum import Enum
+
+# Third Party
+from requests.__version__ import __version__ as requests_version
+
 # Django
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+# Alliance Auth
+from esi import __version__ as esi_version
+
 # AA SRP
-from aasrp import __version__
+from aasrp import __version__ as app_version
 
-VERBOSE_NAME = "AA-SRP - A ship replacement module for Alliance Auth"
+APP_NAME = "aa-srp"
+APP_NAME_VERBOSE = "AA SRP"
+APP_NAME_VERBOSE_USERAGENT = "AA-SRP"
+PACKAGE_NAME = "aasrp"
+GITHUB_URL = f"https://github.com/ppfeufer/{APP_NAME}"
 
-verbose_name_slugified: str = slugify(value=VERBOSE_NAME, allow_unicode=True)
-github_url: str = "https://github.com/ppfeufer/aa-srp"
-USERAGENT = f"{verbose_name_slugified} v{__version__} {github_url}"
+
+class UserAgent(Enum):
+    """
+    UserAgent
+    """
+
+    ESI = f"{APP_NAME_VERBOSE_USERAGENT}/{app_version} (+{GITHUB_URL}) Django-ESI/{esi_version}"
+    REQUESTS = f"{APP_NAME_VERBOSE_USERAGENT}/{app_version} (+{GITHUB_URL}) requests/{requests_version}"
+
+
+# aa-srp/aasrp
+APP_BASE_DIR = os.path.join(os.path.dirname(__file__))
+# aa-srp/aasrp/static/aasrp
+APP_STATIC_DIR = os.path.join(APP_BASE_DIR, "static", "aasrp")
 
 
 SRP_REQUEST_NOTIFICATION_INQUIRY_NOTE = _(
@@ -43,15 +67,20 @@ KILLBOARD_DATA = {
 }
 
 
-# Embed colors
-DISCORD_EMBED_COLOR_INFO = 0x5BC0DE
-DISCORD_EMBED_COLOR_SUCCESS = 0x5CB85C
-DISCORD_EMBED_COLOR_WARNING = 0xF0AD4E
-DISCORD_EMBED_COLOR_DANGER = 0xD9534F
+class DiscordEmbedColor(Enum):
+    """
+    Discord embed colors
+    """
+
+    INFO = 0x5BC0DE
+    SUCCESS = 0x5CB85C
+    WARNING = 0xF0AD4E
+    DANGER = 0xD9534F
+
 
 DISCORD_EMBED_COLOR_MAP = {
-    "info": DISCORD_EMBED_COLOR_INFO,
-    "success": DISCORD_EMBED_COLOR_SUCCESS,
-    "warning": DISCORD_EMBED_COLOR_WARNING,
-    "danger": DISCORD_EMBED_COLOR_DANGER,
+    "info": DiscordEmbedColor.INFO.value,
+    "success": DiscordEmbedColor.SUCCESS.value,
+    "warning": DiscordEmbedColor.WARNING.value,
+    "danger": DiscordEmbedColor.DANGER.value,
 }

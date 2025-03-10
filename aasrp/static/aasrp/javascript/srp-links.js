@@ -11,6 +11,7 @@ $(document).ready(() => {
     let totalSrpAmount = 0;
 
     const tableSrpLinks = elementTableSrpLinks.DataTable({
+        language: aaSrpSettings.dataTable.language,
         ajax: {
             url: aaSrpSettings.url.availableSrpLinks,
             dataSrc: '',
@@ -33,8 +34,15 @@ $(document).ready(() => {
                  * @param data
                  * @returns {*}
                  */
-                render: (data) => {
-                    return moment(data).utc().format(aaSrpSettings.datetimeFormat);
+                render: {
+                    _: (data) => {
+                        return data === null ? '' : moment(data).utc().format(
+                            aaSrpSettings.datetimeFormat
+                        );
+                    },
+                    sort: (data) => {
+                        return data === null ? '' : data;
+                    }
                 },
                 className: 'srp-link-fleet-time'
             },
@@ -73,7 +81,7 @@ $(document).ready(() => {
                  */
                 render: (data, type) => {
                     if (type === 'display') {
-                        return `${data.toLocaleString()} ISK`;
+                        return `${new Intl.NumberFormat(aaSrpSettings.locale).format(data)} ISK`;
                     } else {
                         return data;
                     }
@@ -120,8 +128,9 @@ $(document).ready(() => {
 
             totalSrpAmount += parseInt(data.srp_costs);
 
-            $('.srp-dashboard-total-isk-cost-amount')
-                .html(`${totalSrpAmount.toLocaleString()} ISK`);
+            $('.srp-dashboard-total-isk-cost-amount').html(
+                `${new Intl.NumberFormat(aaSrpSettings.locale).format(totalSrpAmount)} ISK`
+            );
         }
     });
 

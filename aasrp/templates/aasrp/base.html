@@ -1,6 +1,7 @@
 {% extends "allianceauth/base-bs5.html" %}
 
 {% load i18n %}
+{% load aa_i18n %}
 
 {% block page_title %}
     {% translate "Ship Replacement" %}
@@ -25,6 +26,19 @@
         </div>
 
         <div class="aa-srp-body">
+            {% get_datatables_language_static LANGUAGE_CODE as DT_LANG_PATH %}
+
+            <script>
+                const aaSrpJsSettingsDefaults = {
+                    datetimeFormat: 'LL<br>LT',
+                    locale: '{{ LANGUAGE_CODE }}',
+                    dataTable: {
+                        paging: true,
+                        language: {url: '{{ DT_LANG_PATH }}'},
+                    }
+                };
+            </script>
+
             {% block aasrp_body %}{% endblock %}
         </div>
 

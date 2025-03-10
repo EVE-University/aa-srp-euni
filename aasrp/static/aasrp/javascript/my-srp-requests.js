@@ -11,6 +11,7 @@ $(document).ready(() => {
     let userSrpAmount = 0;
 
     const tableUserSrpRequests = elementTableUserSrpRequests.DataTable({
+        language: aaSrpSettings.dataTable.language,
         ajax: {
             url: aaSrpSettings.url.userSrpRequests,
             dataSrc: '',
@@ -25,8 +26,15 @@ $(document).ready(() => {
                  * @param data
                  * @returns {*}
                  */
-                render: (data) => {
-                    return moment(data).utc().format(aaSrpSettings.datetimeFormat);
+                render: {
+                    _: (data) => {
+                        return data === null ? '' : moment(data).utc().format(
+                            aaSrpSettings.datetimeFormat
+                        );
+                    },
+                    sort: (data) => {
+                        return data === null ? '' : data;
+                    }
                 },
                 className: 'srp-request-time'
             },
@@ -87,7 +95,7 @@ $(document).ready(() => {
                  */
                 render: (data, type) => {
                     if (type === 'display') {
-                        return `${data.toLocaleString()} ISK`;
+                        return `${new Intl.NumberFormat(aaSrpSettings.locale).format(data)} ISK`;
                     } else {
                         return data;
                     }
@@ -105,7 +113,7 @@ $(document).ready(() => {
                  */
                 render: (data, type) => {
                     if (type === 'display') {
-                        return `${data.toLocaleString()} ISK`;
+                        return `${new Intl.NumberFormat(aaSrpSettings.locale).format(data)} ISK`;
                     } else {
                         return data;
                     }
@@ -168,7 +176,7 @@ $(document).ready(() => {
             userSrpAmount += parseInt(data.payout_amount);
 
             $('.srp-dashboard-user-isk-cost-amount').html(
-                `${userSrpAmount.toLocaleString()} ISK`
+                `${new Intl.NumberFormat(aaSrpSettings.locale).format(userSrpAmount)} ISK`
             );
         }
     });
