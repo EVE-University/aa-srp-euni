@@ -49,6 +49,22 @@ def get_mandatory_form_label_text(text: str) -> str:
         f'<span class="form-field-required">{text} {required_marker}</span>'
     )
 
+def get_optional_form_label_text(text: str) -> str:
+    """
+    Label text for optional form fields
+
+    :param text:
+    :type text:
+    :return:
+    :rtype:
+    """
+
+    optional_text = _("This field is optional")
+
+    return mark_safe(
+        f'<span class="form-field-optional">{text}</span>'
+    )
+
 
 class SrpLinkForm(ModelForm):
     """
@@ -116,8 +132,8 @@ class SrpRequestForm(ModelForm):
 
     additional_info = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 10, "cols": 20, "input_type": "textarea"}),
-        required=True,
-        label=get_mandatory_form_label_text(text=_("Additional information")),
+        required=False,
+        label=get_optional_form_label_text(text=_("Additional information")),
         help_text=_(
             "Please tell us about the circumstances of your untimely demise. "
             "Who was the FC, what doctrine was called, have changes to the fit "
