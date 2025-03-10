@@ -56,6 +56,7 @@ def get_mandatory_form_label_text(text: str) -> str:
         f'<span class="form-field-required">{text} {required_marker}</span>'
     )
 
+
 def get_optional_form_label_text(text: str) -> str:
     """
     Label text for optional form fields
@@ -66,11 +67,7 @@ def get_optional_form_label_text(text: str) -> str:
     :rtype:
     """
 
-    optional_text = _("This field is optional")
-
-    return mark_safe(
-        f'<span class="form-field-optional">{text}</span>'
-    )
+    return mark_safe(f'<span class="form-field-optional">{text}</span>')
 
 
 class SrpLinkForm(ModelForm):
