@@ -57,6 +57,19 @@ def get_mandatory_form_label_text(text: str) -> str:
     )
 
 
+def get_optional_form_label_text(text: str) -> str:
+    """
+    Label text for optional form fields
+
+    :param text:
+    :type text:
+    :return:
+    :rtype:
+    """
+
+    return mark_safe(f'<span class="form-field-optional">{text}</span>')
+
+
 class SrpLinkForm(ModelForm):
     """
     New SRP lnk form
@@ -134,7 +147,7 @@ class SrpRequestForm(ModelForm):
         }
         labels = {
             "killboard_link": get_mandatory_form_label_text(text=_("Killboard link")),
-            "additional_info": get_mandatory_form_label_text(
+            "additional_info": get_optional_form_label_text(
                 text=_("Additional information")
             ),
         }

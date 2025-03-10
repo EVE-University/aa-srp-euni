@@ -12,6 +12,10 @@
         font-weight: bold;
     }
 
+    .aa-srp form label .form-field-optional {
+        font-weight: bold;
+    }
+
     .aa-srp form .aa-srp-form-submitted-info {
         display: none;
     }
